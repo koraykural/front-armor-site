@@ -1,0 +1,14 @@
+:root{--bg:#1a1e16;--card:#242a1f;--line:#3a4230;--ink:#e8e6d8;--dim:#a8a690;--acc:#d9b44a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 "Chakra Petch",system-ui,sans-serif}
+.wrap{max-width:720px;margin:0 auto;padding:24px 16px 64px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+header img{width:44px;height:44px;border-radius:10px}
+header a{color:var(--ink);text-decoration:none;font:22px "Black Ops One",system-ui;letter-spacing:.04em}
+nav{margin-left:auto;display:flex;gap:16px}nav a{font:14px "Chakra Petch",system-ui;color:var(--dim)}
+main{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px}
+h1,h2{font-family:"Black Ops One",system-ui;font-weight:400;letter-spacing:.03em}
+h1{margin:0 0 8px;color:var(--acc)}h2{margin:28px 0 8px;font-size:20px}
+p,li{color:var(--ink)}.dim{color:var(--dim);font-size:14px}
+a{color:var(--acc)}
+.hero{text-align:center}.hero img{width:128px;height:128px;border-radius:28px}
