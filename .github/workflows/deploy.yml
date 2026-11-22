@@ -1,0 +1,35 @@
+name: Deploy game to front-armor.koraykural.com
+on:
+  push:
+    branches: [main]
+    paths: ['game/**']
+  workflow_dispatch:
+concurrency:
+  group: deploy-game
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package
+        run: |
+          test -f game/index.html
+          tar -C game -czf "$RUNNER_TEMP/release.tgz" .
+          ls -lh "$RUNNER_TEMP/release.tgz"
+      - name: Upload and switch
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts \
+            "deploy@$VPS_HOST" "deploy $GITHUB_SHA" < "$RUNNER_TEMP/release.tgz"
+      - name: Remove key
+        if: always()
+        run: rm -f ~/.ssh/deploy_key
