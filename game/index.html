@@ -89,9 +89,9 @@
   var buildUrl = "Build";
   var config = {
     arguments: [],
-    dataUrl: buildUrl + "/3dfeee2a5e81e03b6eda031510bcdbbb.data.unityweb",
-    frameworkUrl: buildUrl + "/84bb5601a4dbd5eaa82bbbbab4692447.framework.js.unityweb",
-    codeUrl: buildUrl + "/ecd635d4a684b87f0edb9d336d8e15d7.wasm.unityweb",
+    dataUrl: buildUrl + "/9c10248b1bc34f6f5bb102b723362caf.data.unityweb",
+    frameworkUrl: buildUrl + "/54a497d0891109bfa7a4fcc10ab19fb5.framework.js.unityweb",
+    codeUrl: buildUrl + "/cfb0524dda43883bf723d9d83ffdd115.wasm.unityweb",
     streamingAssetsUrl: "StreamingAssets",
     companyName: "Front Armor",
     productName: "Front Armor",
@@ -106,16 +106,19 @@
   document.addEventListener("contextmenu", function (e) { e.preventDefault(); });
 
   var script = document.createElement("script");
-  script.src = buildUrl + "/7208d59c15cf6dc786bec1efb64b454d.loader.js";
+  script.src = buildUrl + "/8554dc17a6fef7672dbf13eb1c746406.loader.js";
   script.onload = function () {
-    createUnityInstance(canvas, config, function (p) {
-      fill.style.width = Math.round(p * 100) + "%";
-      statusEl.textContent = p < .9 ? "LOADING  " + Math.round(p * 100) + "%" : "STARTING";
-    }).then(function () {
-      fill.style.width = "100%";
-      setTimeout(function () { document.getElementById("loader").classList.add("gone"); canvas.focus(); }, 250);
-      setTimeout(function () { document.getElementById("loader").remove(); }, 900);
-    }).catch(function (m) { showErr(String(m)); });
+    // one bar: download is the first 80%, the game's own boot (models, audio, menu) the last 20%. The game calls faReady when its menu is up.
+    var shown = 0;
+    function bar(p) { p = Math.max(shown, Math.min(1, p)); shown = p; fill.style.width = (p * 100).toFixed(1) + "%"; statusEl.textContent = "LOADING  " + Math.round(p * 100) + "%"; }
+    window.faBoot = function (p) { bar(.8 + .2 * p); };
+    window.faReady = function () {
+      bar(1); var l = document.getElementById("loader"); if (!l) return;
+      l.classList.add("gone"); canvas.focus(); setTimeout(function () { l.remove(); }, 600);
+    };
+    createUnityInstance(canvas, config, function (p) { bar(.8 * p); })
+      .then(function () { setTimeout(function () { if (shown < .8) bar(.8); }, 0); setTimeout(window.faReady, 20000); }) // safety net if the ready call never comes
+      .catch(function (m) { showErr(String(m)); });
   };
   script.onerror = function () { showErr("Could not load the game. Check your connection and reload."); };
   document.body.appendChild(script);
